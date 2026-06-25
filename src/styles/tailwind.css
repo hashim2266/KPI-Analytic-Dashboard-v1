@@ -1,0 +1,39 @@
+/* 1. Core Tailwind Configuration (Classic PostCSS style) */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* 2. Third-party animations stylesheet */
+@import "tw-animate-css";
+
+/* 3. Global Styles */
+body {
+  background-color: #030805; /* executive emerald background */
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+/* 4. Glassmorphic CSS Layer (Safe for PostCSS engines) */
+@layer utilities {
+  /* This matches the variable classes we used on your cards */
+  .bg-glass-surface {
+    background-color: rgba(4, 20, 12, 0.45) !important;
+  }
+  .border-glass-border {
+    border-color: rgba(16, 185, 129, 0.25) !important;
+  }
+
+  /* Premium Edge-Lighting sweeping mechanics */
+  .glass-card-mask {
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .animate-edge-sweep {
+    animation: sweep 12s linear infinite;
+  }
+}
+
+@keyframes sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
