@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { BarChart2, TrendingUp, CheckCircle2, Clock3, Activity, Search, ExternalLink, ShieldCheck, Plus, Check, BrainCircuit, Settings } from 'lucide-react';
+import { BarChart2, TrendingUp, CheckCircle2, Clock3, Activity, Search, ExternalLink, ShieldCheck, Plus, Check, BrainCircuit, Settings, BookOpen } from 'lucide-react';
 import { sections as initialSections, Section, Task } from '../data/tasks'; 
 import { SectionDonut } from '../components/SectionDonut';
 import { DashboardSidebar } from '../components/DashboardSidebar';
 import { CriticalTasks } from '../components/CriticalTasks';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ReportLibrary } from '../components/ReportLibrary';
 
 const premiumTorchCard = "relative rounded-[24px] bg-[#05180d] border border-emerald-500/10 shadow-[0_16px_40px_0_rgba(0,0,0,0.85)] p-5 overflow-hidden transition-all duration-300 hover:border-emerald-400/30 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_45%)] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.05),transparent_40%)]";
 
@@ -22,7 +23,9 @@ const peakActivityData = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
- // 1. Load data from Local Storage first, fallback to initial data if empty
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  
+  // 1. Load data from Local Storage first, fallback to initial data if empty
   const [appSections, setAppSections] = useState<Section[]>(() => {
     const savedData = localStorage.getItem('kpi_system_data');
     if (savedData) {
@@ -35,6 +38,7 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem('kpi_system_data', JSON.stringify(appSections));
   }, [appSections]);
+  
   const [activeSectionInput, setActiveSectionInput] = useState<string | null>(null);
   const [newActivityText, setNewActivityText] = useState('');
   const [newActivityTarget, setNewActivityTarget] = useState(1);
@@ -72,7 +76,7 @@ export default function Dashboard() {
     setActiveSectionInput(null);
   };
 
-  const filteredSections = appSections.filter(sec => {
+  const filteredSections = appSections.filter((sec: Section) => {
     const matchSectionName = sec.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                              sec.fullName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchTasks = sec.tasks.some(task => 
@@ -99,7 +103,6 @@ export default function Dashboard() {
               <BarChart2 className="size-5 text-emerald-400" />
             </div>
             <div>
-              {/* FIXED: Title is now KPI ANALYTIC SYSTEM, larger font, premium cream color */}
               <h1 className="text-[#f5f7f2] font-extrabold text-lg leading-tight tracking-wider uppercase">KPI ANALYTIC SYSTEM</h1>
               <p className="text-[10px] text-[#f5f7f2]/50 font-mono font-bold uppercase tracking-widest">PENTADBIRAN CORPORATE CENTER • REVISION 2026</p>
             </div>
@@ -110,7 +113,6 @@ export default function Dashboard() {
               <span className="text-[10px] font-extrabold text-[#f5f7f2]/70 tracking-widest uppercase">PURATA KPI REAL-TIME</span>
               <span className="text-xl font-light ml-1 text-[#f5f7f2]">{overall}%</span>
             </div>
-            {/* HIDDEN ADMIN BUTTON */}
             <button 
               onClick={() => alert('Mod Admin: Di sini anda boleh pautkan ke halaman tetapan khas.')} 
               className="p-2 rounded-xl hover:bg-emerald-500/10 text-[#f5f7f2]/30 hover:text-emerald-400 transition-colors"
@@ -128,15 +130,15 @@ export default function Dashboard() {
           {/* ── LEFT SIDE COLUMN ── */}
           <div className="col-span-1 flex flex-col gap-5">
             
-            {/* Sidebar Module (Your original clock lives inside here!) */}
-            <div className="torch-light-card p-0">
+            {/* Sidebar Module */}
+            <div className={`${premiumTorchCard} p-0`}>
               <div className="p-5 relative z-10">
                 <DashboardSidebar />
               </div>
             </div>
             
-            {/* Carian Deck */}
-            <div className="torch-light-card p-5">
+            {/* Carian Deck & Pangkalan Arkib */}
+            <div className={premiumTorchCard}>
               <div className="relative z-10 flex flex-col gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -146,6 +148,7 @@ export default function Dashboard() {
                   <p className="text-[10px] text-[#f5f7f2]/60 uppercase font-extrabold tracking-wider">Integrasi MyPPSM Live Database Engine</p>
                 </div>
 
+                {/* Search Input */}
                 <div className="relative">
                   <input 
                     type="text"
@@ -159,26 +162,19 @@ export default function Dashboard() {
                   </button>
                 </div>
 
-                <div>
-                  <p className="text-[9px] font-extrabold text-[#f5f7f2]/50 uppercase tracking-widest mb-1.5">TOPIK POPULAR</p>
-                  <div className="flex flex-wrap gap-1">
-                    {['Cuti', 'Selesai', 'Proses', 'Aset', 'Perjawatan'].map(topic => (
-                      <button 
-                        key={topic} 
-                        onClick={() => setSearchQuery(topic === searchQuery ? '' : topic)} 
-                        className={`text-[9px] font-extrabold uppercase tracking-widest px-2 py-1 rounded border transition-colors ${
-                          searchQuery === topic 
-                            ? 'bg-emerald-500/30 text-[#f5f7f2] border-emerald-400' 
-                            : 'bg-emerald-950/40 text-[#f5f7f2]/60 border-emerald-900/30 hover:bg-emerald-900/40'
-                        }`}
-                      >
-                        {topic}
-                      </button>
-                    ))}
-                  </div>
+                {/* Report Library Button */}
+                <div className="mt-1">
+                  <p className="text-[9px] font-extrabold text-[#f5f7f2]/50 uppercase tracking-widest mb-2">PANGKALAN ARKIB DOKUMEN</p>
+                  <button 
+                    onClick={() => setIsLibraryOpen(true)}
+                    className="w-full py-3 rounded-xl border border-emerald-500/30 bg-emerald-950/40 text-[10px] uppercase tracking-widest font-extrabold text-emerald-400 hover:bg-emerald-400 hover:text-black transition-all flex items-center justify-center gap-2 shadow-sm group"
+                  >
+                    <BookOpen className="size-4 group-hover:scale-110 transition-transform" /> BUKA REPORT LIBRARY
+                  </button>
                 </div>
 
-                <div className="mt-1 pt-3 border-t border-emerald-950/80">
+                {/* HRMIS Portal Link */}
+                <div className="pt-3 border-t border-emerald-950/80">
                   <a 
                     href="https://hrmis2.eghrmis.gov.my/" 
                     target="_blank" 
@@ -202,7 +198,7 @@ export default function Dashboard() {
           {/* ── RIGHT MAIN COLUMN ── */}
           <div className="col-span-3 flex flex-col gap-5">
 
-            {/* ROW 1: 5 Section Donut Meters */}
+            {/* ROW 1: 4 Section Donut Meters */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[11px] font-extrabold tracking-wider text-[#f5f7f2] uppercase">
@@ -210,11 +206,11 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              <div className="grid grid-cols-5 gap-3.5">
-                {filteredSections.map(sec => {
+              <div className="grid grid-cols-4 gap-5">
+                {filteredSections.slice(0, 4).map((sec: Section) => {
                   const insight = getSectionInsight(sec);
                   return (
-                    <div key={sec.id} className="torch-light-card p-4 flex flex-col gap-3 justify-between h-full">
+                    <div key={sec.id} className={`${premiumTorchCard} p-4 flex flex-col gap-3 justify-between h-full`}>
                       <div className="relative z-10 flex flex-col gap-3 h-full">
                         <SectionDonut section={sec} completion={dynamicAvg(sec.id)} />
                         
@@ -239,7 +235,7 @@ export default function Dashboard() {
 
               {/* Secure Input Workspace */}
               {activeSectionInput && (
-                <div className="torch-light-card p-5 mt-3">
+                <div className={`${premiumTorchCard} p-5 mt-4`}>
                   <div className="relative z-10">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -284,8 +280,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* ROW 2: Rebuilt Original High-Peak Metric Chart */}
-            <div className="torch-light-card p-5">
+            {/* ROW 2: High-Peak Metric Chart */}
+            <div className={premiumTorchCard}>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -322,7 +318,7 @@ export default function Dashboard() {
                   { label: 'TUGASAN BERJAYA SELESAI', value: totalDone, icon: <CheckCircle2 className="size-4" />, sub: 'ABSOLUTE SUCCESS COMPLIANCE RATING' },
                   { label: 'SEDANG PROSES AKTIF', value: totalInProg, icon: <Clock3 className="size-4" />, sub: 'OPERATIONAL PIPELINES LIVE STREAMING' },
                 ].map(card => (
-                  <div key={card.label} className="torch-light-card p-4 flex items-center gap-4 flex-1">
+                  <div key={card.label} className={`${premiumTorchCard} p-4 flex items-center gap-4 flex-1`}>
                     <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex-shrink-0 relative z-10">
                       {card.icon}
                     </div>
@@ -339,7 +335,7 @@ export default function Dashboard() {
                 <CriticalTasks />
               </div>
 
-              <div className="torch-light-card p-4">
+              <div className={premiumTorchCard}>
                 <div className="relative z-10 flex flex-col justify-between h-full min-h-[240px]">
                   <div>
                     <h3 className="font-extrabold text-[10px] mb-3 flex items-center gap-2 text-[#f5f7f2] uppercase tracking-widest">
@@ -379,6 +375,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Report Library Portal Trigger Container */}
+      <ReportLibrary isOpen={isLibraryOpen} onOpenChange={setIsLibraryOpen} />
     </div>
   );
 }
